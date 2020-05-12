@@ -1,11 +1,27 @@
 package ro.chris.schlechta.model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "user", schema = "stock_alarms")
 public class User {
 
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.TABLE)
+    private Long id;
+
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
-    private String password;
+
+    @Column(name = "pass", nullable = false)
+    private String pass;
 
     public String getFirstName() {
         return firstName;
@@ -34,12 +50,12 @@ public class User {
         return this;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPass() {
+        return pass;
     }
 
-    public User setPassword(String password) {
-        this.password = password;
+    public User setPass(String pass) {
+        this.pass = pass;
         return this;
     }
 }
