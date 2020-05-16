@@ -7,9 +7,9 @@ import javax.persistence.*;
 public class User {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.TABLE)
-    private Long id;
+    private Long userId;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -21,7 +21,20 @@ public class User {
     private String email;
 
     @Column(name = "pass", nullable = false)
-    private String pass;
+    private String password;
+
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthorityType role;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public User setUserId(Long userId) {
+        this.userId = userId;
+        return this;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -50,12 +63,21 @@ public class User {
         return this;
     }
 
-    public String getPass() {
-        return pass;
+    public String getPassword() {
+        return password;
     }
 
-    public User setPass(String pass) {
-        this.pass = pass;
+    public User setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public AuthorityType getRole() {
+        return role;
+    }
+
+    public User setRole(AuthorityType role) {
+        this.role = role;
         return this;
     }
 }

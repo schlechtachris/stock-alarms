@@ -4,23 +4,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ro.chris.schlechta.config.security.CurrentAuthentication;
+import ro.chris.schlechta.model.AuthorityType;
 import ro.chris.schlechta.model.User;
 import ro.chris.schlechta.repository.UserRepository;
 import ro.chris.schlechta.request.RegisterRequestModel;
+
+import java.util.Optional;
 
 /**
  * It contains the logic needed to register a new {@link User}
  */
 @Service
-public class RegisterService {
+public class UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository repository;
+    private final CurrentAuthentication authentication;
 
     @Autowired
-    public RegisterService(UserRepository repository) {
+    public UserService(UserRepository repository, CurrentAuthentication authentication) {
         this.repository = repository;
+        this.authentication = authentication;
     }
 
     /**
@@ -29,10 +35,10 @@ public class RegisterService {
      * @param registerForm form submitted by the new user
      * @return true if the user data was persisted successfully, otherwise false
      */
-    public boolean registerUser(RegisterRequestModel registerForm) {
+    public boolean saveNewUser(RegisterRequestModel registerForm) {
         LOGGER.info("Verifying new user's passwords");
 
-        if (registerForm.getPass().equals(registerForm.getPassCheck())) {
+        if (!registerForm.getPassword().equals(registerForm.getPasswordCheck())) {
             LOGGER.error("The password and check password do not match!");
             return false;
         }
@@ -47,12 +53,20 @@ public class RegisterService {
                 .setFirstName(registerForm.getFirstName())
                 .setLastName(registerForm.getLastName())
                 .setEmail(registerForm.getEmail())
-                .setPass(registerForm.getPass());
+                .setPassword(registerForm.getPassword())
+                .setRole(AuthorityType.ROLE_USER);
 
         repository.save(user);
         LOGGER.info("Successfully persisted new user with email: {}.", registerForm.getEmail());
 
         return true;
+    }
+
+    public User getAuthenticatedUser() {
+        String authenticatedUserEmail = authentication.getAuthentication().getName();
+        Optional<User> authenticatedUser = repository.findByEmail(authenticatedUserEmail);
+
+        return authenticatedUser.orElse(null);
     }
 
 }

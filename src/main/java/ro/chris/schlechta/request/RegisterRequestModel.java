@@ -14,10 +14,10 @@ public class RegisterRequestModel {
     private String email;
 
     @NotNull
-    private String pass;
+    private String password;
 
     @NotNull
-    private String passCheck;
+    private String passwordCheck;
 
     public String getFirstName() {
         return firstName;
@@ -46,22 +46,21 @@ public class RegisterRequestModel {
         return this;
     }
 
-
-    public String getPass() {
-        return pass;
+    public String getPassword() {
+        return password;
     }
 
-    public RegisterRequestModel setPass(String pass) {
-        this.pass = pass;
+    public RegisterRequestModel setPassword(String password) {
+        this.password = password;
         return this;
     }
 
-    public String getPassCheck() {
-        return passCheck;
+    public String getPasswordCheck() {
+        return passwordCheck;
     }
 
-    public RegisterRequestModel setPassCheck(String passCheck) {
-        this.passCheck = passCheck;
+    public RegisterRequestModel setPasswordCheck(String passwordCheck) {
+        this.passwordCheck = passwordCheck;
         return this;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class ObjectMapperConfiguration extends ObjectMapper {
 
-//	private static final long serialVersionUID = -7907677829023852078L;
+	private static final long serialVersionUID = -7907677829023852078L;
 
 	public ObjectMapperConfiguration() {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);

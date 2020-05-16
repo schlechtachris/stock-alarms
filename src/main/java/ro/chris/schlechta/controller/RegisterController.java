@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ro.chris.schlechta.request.RegisterRequestModel;
 import ro.chris.schlechta.response.StandardResponse;
-import ro.chris.schlechta.service.RegisterService;
+import ro.chris.schlechta.service.UserService;
 
 import javax.validation.Valid;
 
@@ -18,10 +18,10 @@ public class RegisterController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterController.class);
 
-    private final RegisterService service;
+    private final UserService service;
 
     @Autowired
-    public RegisterController(RegisterService service) {
+    public RegisterController(UserService service) {
         this.service = service;
     }
 
@@ -29,7 +29,7 @@ public class RegisterController {
     public ResponseEntity<StandardResponse> register(@RequestBody @Valid RegisterRequestModel registerForm) {
         LOGGER.info("Register new user...");
 
-        if (service.registerUser(registerForm)) {
+        if (service.saveNewUser(registerForm)) {
             return ResponseEntity
                     .ok(new StandardResponse("Successfully registered!", null));
         }
