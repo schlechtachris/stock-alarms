@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ro.chris.schlechta.request.RegisterRequestModel;
 import ro.chris.schlechta.response.StandardResponse;
@@ -14,6 +15,7 @@ import ro.chris.schlechta.service.UserService;
 import javax.validation.Valid;
 
 @RestController
+@RequestMapping("/register")
 public class RegisterController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterController.class);
@@ -25,7 +27,7 @@ public class RegisterController {
         this.service = service;
     }
 
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<StandardResponse> register(@RequestBody @Valid RegisterRequestModel registerForm) {
         LOGGER.info("Register new user...");
 

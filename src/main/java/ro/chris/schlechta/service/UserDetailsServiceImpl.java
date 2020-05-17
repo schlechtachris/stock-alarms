@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ro.chris.schlechta.model.CustomUserDetails;
-import ro.chris.schlechta.model.User;
+import ro.chris.schlechta.model.persisted.User;
 import ro.chris.schlechta.repository.UserRepository;
 
 import java.util.Optional;

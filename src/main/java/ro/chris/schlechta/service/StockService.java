@@ -4,13 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ro.chris.schlechta.model.GlobalQuote;
-import ro.chris.schlechta.model.Stock;
-import ro.chris.schlechta.model.StockAlarm;
+import ro.chris.schlechta.model.GlobalQuoteItem;
+import ro.chris.schlechta.model.persisted.Stock;
 import ro.chris.schlechta.repository.StockRepository;
 
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class StockService {
@@ -29,33 +31,44 @@ public class StockService {
         return repository.findAll();
     }
 
-    public void saveOrUpdateStocks(List<GlobalQuote> globalQuotes) {
+    public List<Stock> saveOrUpdateStocks(List<GlobalQuoteItem> globalQuoteItems) {
         LOGGER.info("Saving or updating stocks...");
+        List<Stock> toBeSaved = new LinkedList<>();
 
-        for (GlobalQuote globalQuote : globalQuotes) {
-            Optional<Stock> existingStock = repository.findByStockSymbol(globalQuote.getSymbol());
+        Map<String, Stock> stockMap = repository.findAll()
+                .stream()
+                .collect(Collectors.toMap(Stock::getStockSymbol, stock -> stock));
 
-            if (existingStock.isPresent()) {
-                updateStock(globalQuote, existingStock.get());
+        for (GlobalQuoteItem globalQuoteItem : globalQuoteItems) {
+            if (globalQuoteItem == null || globalQuoteItem.getSymbol() == null) {
+                continue;
+            }
+
+            Stock existingStock = stockMap.get(globalQuoteItem.getSymbol());
+
+            if (existingStock != null) {
+                updateStock(toBeSaved, globalQuoteItem, existingStock);
             } else {
-                saveNewStock(globalQuote);
+                createNewStock(toBeSaved, globalQuoteItem);
             }
         }
+
+        return repository.saveAll(toBeSaved);
     }
 
-    private void saveNewStock(GlobalQuote globalQuote) {
-        Stock newStock = new Stock();
-
-        newStock
-                .setStockSymbol(globalQuote.getSymbol())
-                .setPrice(Double.parseDouble(globalQuote.getPrice()));
-
-        repository.save(newStock);
+    private void createNewStock(List<Stock> toBeSaved, GlobalQuoteItem globalQuoteItem) {
+        toBeSaved.add(
+                new Stock()
+                        .setStockSymbol(globalQuoteItem.getSymbol())
+                        .setPrice(Double.parseDouble(globalQuoteItem.getPrice()))
+                        .setLastUpdate(Calendar.getInstance().getTime())
+        );
     }
 
-    private void updateStock(GlobalQuote globalQuote, Stock existingStock) {
-        existingStock.setPrice(Double.parseDouble(globalQuote.getPrice()));
-        repository.save(existingStock);
+    private void updateStock(List<Stock> toBeSaved, GlobalQuoteItem globalQuoteItem, Stock existingStock) {
+        existingStock.setPrice(Double.parseDouble(globalQuoteItem.getPrice()));
+        existingStock.setLastUpdate(Calendar.getInstance().getTime());
+        toBeSaved.add(existingStock);
     }
 
 }

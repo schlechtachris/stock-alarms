@@ -1,6 +1,8 @@
-package ro.chris.schlechta.dto;
+package ro.chris.schlechta.model;
 
-public class StockAlarmDto {
+import javax.persistence.Column;
+
+public class AlarmDto {
 
     private String stockSymbol;
 
@@ -18,7 +20,7 @@ public class StockAlarmDto {
         return stockSymbol;
     }
 
-    public StockAlarmDto setStockSymbol(String stockSymbol) {
+    public AlarmDto setStockSymbol(String stockSymbol) {
         this.stockSymbol = stockSymbol;
         return this;
     }
@@ -27,7 +29,7 @@ public class StockAlarmDto {
         return initialPrice;
     }
 
-    public StockAlarmDto setInitialPrice(Double initialPrice) {
+    public AlarmDto setInitialPrice(Double initialPrice) {
         this.initialPrice = initialPrice;
         return this;
     }
@@ -36,7 +38,7 @@ public class StockAlarmDto {
         return currentPrice;
     }
 
-    public StockAlarmDto setCurrentPrice(Double currentPrice) {
+    public AlarmDto setCurrentPrice(Double currentPrice) {
         this.currentPrice = currentPrice;
         return this;
     }
@@ -45,7 +47,7 @@ public class StockAlarmDto {
         return positiveVariance;
     }
 
-    public StockAlarmDto setPositiveVariance(Double positiveVariance) {
+    public AlarmDto setPositiveVariance(Double positiveVariance) {
         this.positiveVariance = positiveVariance;
         return this;
     }
@@ -54,7 +56,7 @@ public class StockAlarmDto {
         return negativeVariance;
     }
 
-    public StockAlarmDto setNegativeVariance(Double negativeVariance) {
+    public AlarmDto setNegativeVariance(Double negativeVariance) {
         this.negativeVariance = negativeVariance;
         return this;
     }
@@ -63,7 +65,7 @@ public class StockAlarmDto {
         return active;
     }
 
-    public StockAlarmDto setActive(boolean active) {
+    public AlarmDto setActive(boolean active) {
         this.active = active;
         return this;
     }

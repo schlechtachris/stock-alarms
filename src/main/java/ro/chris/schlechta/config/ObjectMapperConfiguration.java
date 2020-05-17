@@ -10,10 +10,12 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class ObjectMapperConfiguration extends ObjectMapper {
 
-	private static final long serialVersionUID = -7907677829023852078L;
+    private static final long serialVersionUID = -7907677829023852078L;
 
-	public ObjectMapperConfiguration() {
+    public ObjectMapperConfiguration() {
         setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 

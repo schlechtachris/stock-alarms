@@ -1,4 +1,6 @@
-package ro.chris.schlechta.model;
+package ro.chris.schlechta.model.persisted;
+
+import ro.chris.schlechta.model.AuthorityType;
 
 import javax.persistence.*;
 

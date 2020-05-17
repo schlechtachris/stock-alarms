@@ -4,13 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ro.chris.schlechta.model.GlobalQuote;
-import ro.chris.schlechta.model.StockAlarm;
-import ro.chris.schlechta.model.User;
+import ro.chris.schlechta.model.persisted.Stock;
+import ro.chris.schlechta.model.persisted.StockAlarm;
+import ro.chris.schlechta.model.persisted.User;
 import ro.chris.schlechta.repository.StockAlarmRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StockAlarmService {
@@ -19,11 +20,13 @@ public class StockAlarmService {
 
     private final StockAlarmRepository repository;
     private final UserService userService;
+    private final EmailService emailService;
 
     @Autowired
-    public StockAlarmService(StockAlarmRepository repository, UserService userService) {
+    public StockAlarmService(StockAlarmRepository repository, UserService userService, EmailService emailService) {
         this.repository = repository;
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     public StockAlarm createNewAlarm(StockAlarm stockAlarm) {
@@ -44,21 +47,38 @@ public class StockAlarmService {
         return repository.findByUser(authenticatedUser);
     }
 
+    public Optional<StockAlarm> getAlarmById(Long id) {
+        LOGGER.info("Retrieve alarm by id: {}", id);
+
+        return repository.findById(id);
+    }
+
     public StockAlarm updateAlarm(StockAlarm alarm) {
-        LOGGER.info("Update alarm for stock {}", alarm.getStockSymbol());
+        LOGGER.info("Update alarm for stock: {}.", alarm.getStockSymbol());
+
+        if (repository.findByStockSymbol(alarm.getStockSymbol()).isEmpty()) {
+            LOGGER.info("There is no alarm for stock: {}.", alarm.getStockSymbol());
+            return null;
+        }
 
         return repository.save(alarm);
     }
 
-    public void updateCurrentPrice(List<GlobalQuote> globalQuotes) {
+    public void updateCurrentPrice(List<Stock> stocks) {
         LOGGER.info("Update current price for stock alarms");
 
-        globalQuotes
-                .forEach(globalQuote -> {
-                    Optional<StockAlarm> stockAlarm = repository.findByStockSymbol(globalQuote.getSymbol());
-                    stockAlarm.get().setCurrentPrice(Double.parseDouble(globalQuote.getPrice()));
-                    repository.save(stockAlarm.get());
-                });
+        stocks
+                .forEach(
+                        stock -> {
+                            Optional<StockAlarm> stockAlarm = repository.findByStockSymbol(stock.getStockSymbol());
+
+                            stockAlarm.ifPresentOrElse(
+                                    alarm -> {
+                                        alarm.setCurrentPrice(stock.getPrice());
+                                        repository.save(alarm);
+                                    },
+                                    () -> LOGGER.info("There is no alarm for stock: {}.", stock.getStockSymbol()));
+                        });
     }
 
     public void deleteAllAlarms() {
@@ -69,16 +89,34 @@ public class StockAlarmService {
     }
 
     public void verifyAlarms() {
-        List<StockAlarm> stockAlarms = repository.findAll();
+        LOGGER.info("Verify active stock alarms...");
 
-        stockAlarms.forEach(stockAlarm -> {
-            double priceVariationPercentage = calculatePriceVariation(stockAlarm);
+        List<StockAlarm> activeAlarms = repository.findAll()
+                .stream()
+                .filter(StockAlarm::isActive)
+                .collect(Collectors.toList());
 
-            if (priceVariationPercentage > stockAlarm.getPositiveVariance()
-                    || priceVariationPercentage < stockAlarm.getNegativeVariance()) {
-                //TODO send email to users
-            }
-        });
+        if (activeAlarms.isEmpty()) {
+            LOGGER.info("There are no active stock alarms defined...");
+            return;
+        }
+
+        activeAlarms
+                .forEach(
+                        stockAlarm -> {
+                            double priceVariationPercentage = calculatePriceVariation(stockAlarm);
+
+                            if (priceVariationPercentage > stockAlarm.getPositiveVariance()
+                                    || priceVariationPercentage < stockAlarm.getNegativeVariance()) {
+
+                                emailService.sendEmail(stockAlarm);
+                                stockAlarm.setActive(false);
+                            }
+                        }
+                );
+
+        repository.saveAll(activeAlarms);
+        LOGGER.info("The users were notified and alarms deactivated.");
     }
 
     private double calculatePriceVariation(StockAlarm stockAlarm) {

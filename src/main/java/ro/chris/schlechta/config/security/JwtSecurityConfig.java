@@ -22,7 +22,11 @@ import ro.chris.schlechta.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(
+        securedEnabled = true,
+        jsr250Enabled = true,
+        prePostEnabled = true
+)
 public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String REGISTER_ENDPOINT = "/register";

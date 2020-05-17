@@ -3,10 +3,11 @@ package ro.chris.schlechta.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ro.chris.schlechta.config.security.CurrentAuthentication;
 import ro.chris.schlechta.model.AuthorityType;
-import ro.chris.schlechta.model.User;
+import ro.chris.schlechta.model.persisted.User;
 import ro.chris.schlechta.repository.UserRepository;
 import ro.chris.schlechta.request.RegisterRequestModel;
 
@@ -22,11 +23,13 @@ public class UserService {
 
     private final UserRepository repository;
     private final CurrentAuthentication authentication;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository repository, CurrentAuthentication authentication) {
+    public UserService(UserRepository repository, CurrentAuthentication authentication, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.authentication = authentication;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -53,7 +56,7 @@ public class UserService {
                 .setFirstName(registerForm.getFirstName())
                 .setLastName(registerForm.getLastName())
                 .setEmail(registerForm.getEmail())
-                .setPassword(registerForm.getPassword())
+                .setPassword(passwordEncoder.encode(registerForm.getPassword()))
                 .setRole(AuthorityType.ROLE_USER);
 
         repository.save(user);

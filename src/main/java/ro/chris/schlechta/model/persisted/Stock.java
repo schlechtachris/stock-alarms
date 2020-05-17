@@ -1,6 +1,7 @@
-package ro.chris.schlechta.model;
+package ro.chris.schlechta.model.persisted;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "stock", schema = "stock_alarms")
@@ -16,6 +17,10 @@ public class Stock {
 
     @Column(name = "price")
     private double price;
+
+    @Column(name = "last_update")
+    @Temporal(TemporalType.DATE)
+    private Date lastUpdate;
 
     public Long getId() {
         return id;
@@ -41,6 +46,15 @@ public class Stock {
 
     public Stock setPrice(double price) {
         this.price = price;
+        return this;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public Stock setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
         return this;
     }
 }
