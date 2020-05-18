@@ -3,23 +3,18 @@ package ro.chris.schlechta.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import ro.chris.schlechta.model.AlarmDto;
-import ro.chris.schlechta.model.AuthorityType;
+import ro.chris.schlechta.dto.StockAlarmDto;
 import ro.chris.schlechta.model.CustomUserDetails;
-import ro.chris.schlechta.model.persisted.StockAlarm;
+import ro.chris.schlechta.model.StockAlarm;
 import ro.chris.schlechta.response.StandardResponse;
 import ro.chris.schlechta.service.StockAlarmService;
 
 import java.net.URI;
 import java.util.Optional;
-
-import static ro.chris.schlechta.model.AuthorityType.ROLE_USER;
 
 @RestController
 public class StockAlarmController {
@@ -34,6 +29,7 @@ public class StockAlarmController {
     }
 
     @GetMapping("/alarms")
+    @Secured("ROLE_USER")
     public ResponseEntity<StandardResponse> getAllAlarms() {
         LOGGER.info("Handling GET request to /alarms.");
 
@@ -41,7 +37,8 @@ public class StockAlarmController {
                 .ok(new StandardResponse("Alarms set.", service.getAllAlarmsPerUser()));
     }
 
-    @GetMapping("/alarm/{id}")
+    @GetMapping("/alarms/{id}")
+    @Secured("ROLE_USER")
     public ResponseEntity<StandardResponse> getAllAlarms(@PathVariable("id") String id) {
         LOGGER.info("Handling GET request to /alarms/{}.", id);
 
@@ -57,14 +54,13 @@ public class StockAlarmController {
                 .ok(new StandardResponse("Successfully retrieved alarm.", alarmById.get()));
     }
 
-    @PostMapping("/alarm")
+    @PostMapping("/alarms")
     @Secured("ROLE_USER")
-    public ResponseEntity<StandardResponse> createNewAlarm(@RequestBody StockAlarm stockAlarm,
-//    public ResponseEntity<StandardResponse> createNewAlarm(@RequestBody AlarmDto stockAlarm,
+    public ResponseEntity<StandardResponse> createNewAlarm(@RequestBody StockAlarmDto stockAlarmDto,
                                                            @AuthenticationPrincipal CustomUserDetails user) {
 
-        LOGGER.info("Create new alarm for stock: {} by user: {}.", stockAlarm.getStockSymbol(), user.getUsername());
-        StockAlarm createdAlarm = service.createNewAlarm(stockAlarm);
+        LOGGER.info("Create new alarm for stock: {} by user: {}.", stockAlarmDto.getStockSymbol(), user.getUsername());
+        StockAlarm createdAlarm = service.saveOrUpdateAlarm(stockAlarmDto);
 
         if (createdAlarm == null) {
             return ResponseEntity
@@ -73,15 +69,16 @@ public class StockAlarmController {
         }
 
         return ResponseEntity
-                .created(URI.create("http://localhost:8081/alarm/" + createdAlarm.getId()))
+                .created(URI.create("http://localhost:8081/alarms/" + createdAlarm.getId()))
                 .body(new StandardResponse("The alarm was created successfully", createdAlarm));
     }
 
-    @PutMapping("/alarm")
-    public ResponseEntity<StandardResponse> updateAlarms(@RequestBody StockAlarm stockAlarm) {
-        LOGGER.info("Handling PUT request to /alarm.");
+    @PutMapping("/alarms")
+    @Secured("ROLE_USER")
+    public ResponseEntity<StandardResponse> updateAlarms(@RequestBody StockAlarmDto stockAlarmDto) {
+        LOGGER.info("Handling PUT request to /alarms.");
 
-        StockAlarm updatedAlarm = service.updateAlarm(stockAlarm);
+        StockAlarm updatedAlarm = service.saveOrUpdateAlarm(stockAlarmDto);
 
         if (updatedAlarm == null) {
             return ResponseEntity.badRequest()
@@ -93,6 +90,7 @@ public class StockAlarmController {
     }
 
     @DeleteMapping("/alarms")
+    @Secured("ROLE_USER")
     public ResponseEntity<StandardResponse> deleteAlarms(@AuthenticationPrincipal CustomUserDetails user) {
         LOGGER.info("Deleting all alarms for user: {}", user.getUsername());
 

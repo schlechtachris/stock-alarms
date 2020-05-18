@@ -1,4 +1,4 @@
-package ro.chris.schlechta.model.persisted;
+package ro.chris.schlechta.model;
 
 import javax.persistence.*;
 

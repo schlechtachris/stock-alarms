@@ -2,7 +2,7 @@ package ro.chris.schlechta.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ro.chris.schlechta.model.persisted.Stock;
+import ro.chris.schlechta.model.Stock;
 
 import java.util.Optional;
 

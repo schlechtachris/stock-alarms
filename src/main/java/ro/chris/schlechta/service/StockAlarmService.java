@@ -4,9 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ro.chris.schlechta.model.persisted.Stock;
-import ro.chris.schlechta.model.persisted.StockAlarm;
-import ro.chris.schlechta.model.persisted.User;
+import ro.chris.schlechta.dto.StockAlarmDto;
+import ro.chris.schlechta.model.Stock;
+import ro.chris.schlechta.model.StockAlarm;
+import ro.chris.schlechta.model.User;
 import ro.chris.schlechta.repository.StockAlarmRepository;
 
 import java.util.List;
@@ -29,39 +30,54 @@ public class StockAlarmService {
         this.emailService = emailService;
     }
 
-    public StockAlarm createNewAlarm(StockAlarm stockAlarm) {
-        Optional<StockAlarm> existingAlarm = repository.findByStockSymbol(stockAlarm.getStockSymbol());
+    public StockAlarm saveOrUpdateAlarm(StockAlarmDto stockAlarmDto) {
+        User authenticatedUser = userService.getAuthenticatedUser();
+        Optional<StockAlarm> existingAlarm = repository.findByStockSymbol(stockAlarmDto.getStockSymbol());
 
-        if (existingAlarm.isPresent() && existingAlarm.get().isActive()) {
-            LOGGER.error("There is already an alarm defined for stock: {}", stockAlarm.getStockSymbol());
-            return null;
+        if (existingAlarm.isPresent()) {
+            if (existingAlarm.get().isActive()) {
+                LOGGER.error("There is already an alarm defined for stock: {}.", stockAlarmDto.getStockSymbol());
+                return null;
+            } else {
+                return updateExistingAlarm(stockAlarmDto, existingAlarm.get());
+            }
         }
 
-        return repository.save(stockAlarm);
+        StockAlarm newStockAlarm = new StockAlarm()
+                .setStockSymbol(stockAlarmDto.getStockSymbol())
+                .setInitialPrice(stockAlarmDto.getInitialPrice())
+                .setCurrentPrice(stockAlarmDto.getCurrentPrice())
+                .setPositiveVariance(stockAlarmDto.getPositiveVariance())
+                .setNegativeVariance(stockAlarmDto.getNegativeVariance())
+                .setActive(true)
+                .setUser(authenticatedUser);
+
+        return repository.save(newStockAlarm);
+    }
+
+    private StockAlarm updateExistingAlarm(StockAlarmDto stockAlarmDto, StockAlarm existingAlarm) {
+        existingAlarm
+                .setInitialPrice(stockAlarmDto.getInitialPrice())
+                .setCurrentPrice(stockAlarmDto.getCurrentPrice())
+                .setPositiveVariance(stockAlarmDto.getPositiveVariance())
+                .setNegativeVariance(stockAlarmDto.getNegativeVariance())
+                .setActive(true);
+
+        return repository.save(existingAlarm
+        );
     }
 
     public List<StockAlarm> getAllAlarmsPerUser() {
         User authenticatedUser = userService.getAuthenticatedUser();
         LOGGER.info("Retrieve all alarms for user {}", authenticatedUser.getEmail());
 
-        return repository.findByUser(authenticatedUser);
+        return repository.findAllByUser(authenticatedUser);
     }
 
     public Optional<StockAlarm> getAlarmById(Long id) {
         LOGGER.info("Retrieve alarm by id: {}", id);
 
         return repository.findById(id);
-    }
-
-    public StockAlarm updateAlarm(StockAlarm alarm) {
-        LOGGER.info("Update alarm for stock: {}.", alarm.getStockSymbol());
-
-        if (repository.findByStockSymbol(alarm.getStockSymbol()).isEmpty()) {
-            LOGGER.info("There is no alarm for stock: {}.", alarm.getStockSymbol());
-            return null;
-        }
-
-        return repository.save(alarm);
     }
 
     public void updateCurrentPrice(List<Stock> stocks) {

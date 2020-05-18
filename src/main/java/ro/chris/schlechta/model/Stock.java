@@ -1,4 +1,4 @@
-package ro.chris.schlechta.model.persisted;
+package ro.chris.schlechta.model;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,6 +14,9 @@ public class Stock {
 
     @Column(name = "stock_symbol")
     private String stockSymbol;
+
+    @Column(name = "company_name")
+    private String companyName;
 
     @Column(name = "price")
     private double price;
@@ -37,6 +40,15 @@ public class Stock {
 
     public Stock setStockSymbol(String stockSymbol) {
         this.stockSymbol = stockSymbol;
+        return this;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public Stock setCompanyName(String companyName) {
+        this.companyName = companyName;
         return this;
     }
 

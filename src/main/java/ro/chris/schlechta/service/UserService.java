@@ -7,7 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ro.chris.schlechta.config.security.CurrentAuthentication;
 import ro.chris.schlechta.model.AuthorityType;
-import ro.chris.schlechta.model.persisted.User;
+import ro.chris.schlechta.model.User;
 import ro.chris.schlechta.repository.UserRepository;
 import ro.chris.schlechta.request.RegisterRequestModel;
 

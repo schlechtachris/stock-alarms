@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ro.chris.schlechta.model.persisted.StockAlarm;
+import ro.chris.schlechta.model.StockAlarm;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

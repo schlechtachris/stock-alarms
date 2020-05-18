@@ -1,6 +1,7 @@
-package ro.chris.schlechta.model.persisted;
+package ro.chris.schlechta.model;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "stock_symbol", schema = "stock_alarms")
@@ -42,5 +43,23 @@ public class StockSymbol {
     public StockSymbol setCompanyName(String companyName) {
         this.companyName = companyName;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        StockSymbol that = (StockSymbol) o;
+
+        return symbol.equals(that.symbol);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, symbol, companyName);
     }
 }

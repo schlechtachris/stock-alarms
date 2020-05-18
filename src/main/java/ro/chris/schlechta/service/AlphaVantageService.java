@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ro.chris.schlechta.model.BestMatches;
-import ro.chris.schlechta.model.BestMatchesItem;
-import ro.chris.schlechta.model.GlobalQuote;
-import ro.chris.schlechta.model.GlobalQuoteItem;
-import ro.chris.schlechta.model.persisted.Stock;
-import ro.chris.schlechta.model.persisted.StockSymbol;
+import ro.chris.schlechta.dto.BestMatchesDto;
+import ro.chris.schlechta.dto.BestMatchesItemDto;
+import ro.chris.schlechta.dto.GlobalQuoteDto;
+import ro.chris.schlechta.dto.GlobalQuoteItemDto;
+import ro.chris.schlechta.model.Stock;
+import ro.chris.schlechta.model.StockSymbol;
 import ro.chris.schlechta.utils.Constants;
 
 import java.util.*;
@@ -41,7 +41,7 @@ public class AlphaVantageService {
     /**
      * fetch data for top 50 brands stocks
      *
-     * @return {@link List} of {@link GlobalQuoteItem}
+     * @return {@link List} of {@link GlobalQuoteItemDto}
      */
     public List<Stock> fetchStocks() {
         LOGGER.info("Fetch stock values...");
@@ -50,8 +50,17 @@ public class AlphaVantageService {
         List<Stock> stocks = stockService.getStocks();
 
         if (stocks.isEmpty() || stockIsNotUpToDate(stocks.get(0).getLastUpdate(), Calendar.getInstance().getTime())) {
-            return persistOrUpdateStocks(symbols);
+            return fetchStockDetails(symbols);
         }
+
+//        if (!stocks.isEmpty()) {
+//            stocks
+//                    .stream()
+//                    .filter(
+//                            stock -> stockIsNotUpToDate(stock.getLastUpdate(),
+//                                    Calendar.getInstance().getTime())
+//                    ).map;
+//        }
 
         return stocks;
     }
@@ -68,20 +77,20 @@ public class AlphaVantageService {
                 || stockCalendar.get(Calendar.DAY_OF_MONTH) < currentCalendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    private List<Stock> persistOrUpdateStocks(List<StockSymbol> symbols) {
-        List<GlobalQuoteItem> globalQuotes = new LinkedList<>();
+    private List<Stock> fetchStockDetails(List<StockSymbol> symbols) {
+        List<GlobalQuoteItemDto> globalQuotes = new LinkedList<>();
 
         for (StockSymbol stockSymbol : symbols) {
             var url = String.format(Constants.ALPHA_VANTAGE_GLOBAL_QUOTE_PATH + "&symbol=%s&apikey=%s",
                     stockSymbol.getSymbol(), apiKey);
 
             LOGGER.info("Fetch stock data for symbol: {}", stockSymbol.getSymbol());
-            globalQuotes.add(Objects.requireNonNull(restTemplate.getForEntity(url, GlobalQuote.class).getBody())
-                    .getGlobalQuoteItem());
+            globalQuotes.add(Objects.requireNonNull(restTemplate.getForEntity(url, GlobalQuoteDto.class).getBody())
+                    .getGlobalQuoteItemDto());
             waitBetweenCalls();
         }
 
-        return stockService.saveOrUpdateStocks(globalQuotes);
+        return stockService.saveOrUpdateStocks(globalQuotes, symbols);
     }
 
     private List<StockSymbol> fetchSymbols() {
@@ -91,7 +100,8 @@ public class AlphaVantageService {
             return stockSymbols;
         }
 
-        List<BestMatchesItem> symbols = new LinkedList<>();
+        List<BestMatchesItemDto> symbols = new LinkedList<>();
+        Set<BestMatchesItemDto> setSymbols = new HashSet<>();
 
         for (int i = ASCII_ALPHABET_START_INDEX; i <= ASCII_ALPHABET_END_INDEX; i++) {
             char character = (char) i;
@@ -99,10 +109,11 @@ public class AlphaVantageService {
                     character, apiKey);
 
             LOGGER.info("Search symbols for letter: {}", character);
-            BestMatches bestMatches = restTemplate.getForEntity(url, BestMatches.class).getBody();
+            BestMatchesDto bestMatchesDto = restTemplate.getForEntity(url, BestMatchesDto.class).getBody();
 
-            if (bestMatches != null && bestMatches.getSymbols() != null) {
-                symbols.addAll(bestMatches.getSymbols());
+            if (bestMatchesDto != null && bestMatchesDto.getSymbols() != null) {
+                symbols.addAll(bestMatchesDto.getSymbols());
+                setSymbols.addAll(bestMatchesDto.getSymbols());
             }
 
             waitBetweenCalls();

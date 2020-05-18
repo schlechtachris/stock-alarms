@@ -1,4 +1,4 @@
-package ro.chris.schlechta.model;
+package ro.chris.schlechta.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Response object for query Alpha Vantage API Quote
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GlobalQuoteItem {
+public class GlobalQuoteItemDto {
 
     @JsonProperty(value = "01. symbol")
     private String symbol;
@@ -43,7 +43,7 @@ public class GlobalQuoteItem {
         return symbol;
     }
 
-    public GlobalQuoteItem setSymbol(String symbol) {
+    public GlobalQuoteItemDto setSymbol(String symbol) {
         this.symbol = symbol;
         return this;
     }
@@ -52,7 +52,7 @@ public class GlobalQuoteItem {
         return open;
     }
 
-    public GlobalQuoteItem setOpen(String open) {
+    public GlobalQuoteItemDto setOpen(String open) {
         this.open = open;
         return this;
     }
@@ -61,7 +61,7 @@ public class GlobalQuoteItem {
         return high;
     }
 
-    public GlobalQuoteItem setHigh(String high) {
+    public GlobalQuoteItemDto setHigh(String high) {
         this.high = high;
         return this;
     }
@@ -70,7 +70,7 @@ public class GlobalQuoteItem {
         return low;
     }
 
-    public GlobalQuoteItem setLow(String low) {
+    public GlobalQuoteItemDto setLow(String low) {
         this.low = low;
         return this;
     }
@@ -79,7 +79,7 @@ public class GlobalQuoteItem {
         return price;
     }
 
-    public GlobalQuoteItem setPrice(String price) {
+    public GlobalQuoteItemDto setPrice(String price) {
         this.price = price;
         return this;
     }
@@ -88,7 +88,7 @@ public class GlobalQuoteItem {
         return volume;
     }
 
-    public GlobalQuoteItem setVolume(String volume) {
+    public GlobalQuoteItemDto setVolume(String volume) {
         this.volume = volume;
         return this;
     }
@@ -97,7 +97,7 @@ public class GlobalQuoteItem {
         return lastTradingDay;
     }
 
-    public GlobalQuoteItem setLastTradingDay(String lastTradingDay) {
+    public GlobalQuoteItemDto setLastTradingDay(String lastTradingDay) {
         this.lastTradingDay = lastTradingDay;
         return this;
     }
@@ -106,7 +106,7 @@ public class GlobalQuoteItem {
         return previousClose;
     }
 
-    public GlobalQuoteItem setPreviousClose(String previousClose) {
+    public GlobalQuoteItemDto setPreviousClose(String previousClose) {
         this.previousClose = previousClose;
         return this;
     }
@@ -115,7 +115,7 @@ public class GlobalQuoteItem {
         return change;
     }
 
-    public GlobalQuoteItem setChange(String change) {
+    public GlobalQuoteItemDto setChange(String change) {
         this.change = change;
         return this;
     }
@@ -124,7 +124,7 @@ public class GlobalQuoteItem {
         return changePercent;
     }
 
-    public GlobalQuoteItem setChangePercent(String changePercent) {
+    public GlobalQuoteItemDto setChangePercent(String changePercent) {
         this.changePercent = changePercent;
         return this;
     }

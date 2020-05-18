@@ -1,8 +1,8 @@
-package ro.chris.schlechta.model;
+package ro.chris.schlechta.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class BestMatchesItem {
+public class BestMatchesItemDto {
 
     @JsonProperty(value = "1. symbol")
     private String symbol;
@@ -35,7 +35,7 @@ public class BestMatchesItem {
         return symbol;
     }
 
-    public BestMatchesItem setSymbol(String symbol) {
+    public BestMatchesItemDto setSymbol(String symbol) {
         this.symbol = symbol;
         return this;
     }
@@ -44,7 +44,7 @@ public class BestMatchesItem {
         return name;
     }
 
-    public BestMatchesItem setName(String name) {
+    public BestMatchesItemDto setName(String name) {
         this.name = name;
         return this;
     }
@@ -53,7 +53,7 @@ public class BestMatchesItem {
         return type;
     }
 
-    public BestMatchesItem setType(String type) {
+    public BestMatchesItemDto setType(String type) {
         this.type = type;
         return this;
     }
@@ -62,7 +62,7 @@ public class BestMatchesItem {
         return region;
     }
 
-    public BestMatchesItem setRegion(String region) {
+    public BestMatchesItemDto setRegion(String region) {
         this.region = region;
         return this;
     }
@@ -71,7 +71,7 @@ public class BestMatchesItem {
         return marketOpen;
     }
 
-    public BestMatchesItem setMarketOpen(String marketOpen) {
+    public BestMatchesItemDto setMarketOpen(String marketOpen) {
         this.marketOpen = marketOpen;
         return this;
     }
@@ -80,7 +80,7 @@ public class BestMatchesItem {
         return marketClose;
     }
 
-    public BestMatchesItem setMarketClose(String marketClose) {
+    public BestMatchesItemDto setMarketClose(String marketClose) {
         this.marketClose = marketClose;
         return this;
     }
@@ -89,7 +89,7 @@ public class BestMatchesItem {
         return timezone;
     }
 
-    public BestMatchesItem setTimezone(String timezone) {
+    public BestMatchesItemDto setTimezone(String timezone) {
         this.timezone = timezone;
         return this;
     }
@@ -98,7 +98,7 @@ public class BestMatchesItem {
         return currency;
     }
 
-    public BestMatchesItem setCurrency(String currency) {
+    public BestMatchesItemDto setCurrency(String currency) {
         this.currency = currency;
         return this;
     }
@@ -107,7 +107,7 @@ public class BestMatchesItem {
         return matchScore;
     }
 
-    public BestMatchesItem setMatchScore(String matchScore) {
+    public BestMatchesItemDto setMatchScore(String matchScore) {
         this.matchScore = matchScore;
         return this;
     }
