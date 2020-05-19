@@ -49,20 +49,39 @@ public class AlphaVantageService {
         List<StockSymbol> symbols = fetchSymbols();
         List<Stock> stocks = stockService.getStocks();
 
-        if (stocks.isEmpty() || stockIsNotUpToDate(stocks.get(0).getLastUpdate(), Calendar.getInstance().getTime())) {
+        // no stocks data persisted before
+        if (stocks.isEmpty()) {
             return fetchStockDetails(symbols);
         }
 
-//        if (!stocks.isEmpty()) {
-//            stocks
-//                    .stream()
-//                    .filter(
-//                            stock -> stockIsNotUpToDate(stock.getLastUpdate(),
-//                                    Calendar.getInstance().getTime())
-//                    ).map;
-//        }
+        // check for stocks which are not up to date
+        List<StockSymbol> stocksNotUpToDate = filterOutUpToDateStocks(symbols, stocks);
+        if(!stocksNotUpToDate.isEmpty()) {
+            return fetchStockDetails(stocksNotUpToDate);
+        }
 
         return stocks;
+    }
+
+    private List<StockSymbol> filterOutUpToDateStocks(List<StockSymbol> symbols, List<Stock> stocks) {
+        List<StockSymbol> symbolsNotUpToDate = new LinkedList<>();
+
+        if (!stocks.isEmpty()) {
+            Date now = Calendar.getInstance().getTime();
+
+            for (StockSymbol stockSymbol : symbols) {
+                Optional<Stock> stockBySymbol = stockService.findBySymbol(stockSymbol.getSymbol());
+
+                stockBySymbol.ifPresent(stock -> {
+                    if (stockIsNotUpToDate(stock.getLastUpdate(), now)) {
+                        symbolsNotUpToDate.add(stockSymbol);
+                    }
+                });
+            }
+
+        }
+
+        return symbolsNotUpToDate;
     }
 
     private boolean stockIsNotUpToDate(Date stockDate, Date now) {
@@ -78,19 +97,25 @@ public class AlphaVantageService {
     }
 
     private List<Stock> fetchStockDetails(List<StockSymbol> symbols) {
-        List<GlobalQuoteItemDto> globalQuotes = new LinkedList<>();
+        List<Stock> stocks = new LinkedList<>();
 
         for (StockSymbol stockSymbol : symbols) {
             var url = String.format(Constants.ALPHA_VANTAGE_GLOBAL_QUOTE_PATH + "&symbol=%s&apikey=%s",
                     stockSymbol.getSymbol(), apiKey);
 
             LOGGER.info("Fetch stock data for symbol: {}", stockSymbol.getSymbol());
-            globalQuotes.add(Objects.requireNonNull(restTemplate.getForEntity(url, GlobalQuoteDto.class).getBody())
-                    .getGlobalQuoteItemDto());
+            GlobalQuoteDto globalQuote = Objects.requireNonNull(
+                    restTemplate.getForEntity(url, GlobalQuoteDto.class).getBody()
+            );
+
+            if (globalQuote.getGlobalQuoteItemDto() != null) {
+                stocks.add(stockService.saveOrUpdateStock(globalQuote.getGlobalQuoteItemDto(), stockSymbol));
+            }
+
             waitBetweenCalls();
         }
 
-        return stockService.saveOrUpdateStocks(globalQuotes, symbols);
+        return stocks;
     }
 
     private List<StockSymbol> fetchSymbols() {
@@ -101,7 +126,6 @@ public class AlphaVantageService {
         }
 
         List<BestMatchesItemDto> symbols = new LinkedList<>();
-        Set<BestMatchesItemDto> setSymbols = new HashSet<>();
 
         for (int i = ASCII_ALPHABET_START_INDEX; i <= ASCII_ALPHABET_END_INDEX; i++) {
             char character = (char) i;
@@ -113,7 +137,6 @@ public class AlphaVantageService {
 
             if (bestMatchesDto != null && bestMatchesDto.getSymbols() != null) {
                 symbols.addAll(bestMatchesDto.getSymbols());
-                setSymbols.addAll(bestMatchesDto.getSymbols());
             }
 
             waitBetweenCalls();

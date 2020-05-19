@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Response object for query Alpha Vantage API Quote
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GlobalQuoteItemDto {
 
     @JsonProperty(value = "01. symbol")

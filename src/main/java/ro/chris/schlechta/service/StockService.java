@@ -9,8 +9,9 @@ import ro.chris.schlechta.model.Stock;
 import ro.chris.schlechta.model.StockSymbol;
 import ro.chris.schlechta.repository.StockRepository;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StockService {
@@ -29,41 +30,24 @@ public class StockService {
         return repository.findAll();
     }
 
-    public List<Stock> saveOrUpdateStocks(List<GlobalQuoteItemDto> globalQuoteItemDtos, List<StockSymbol> symbols) {
-        LOGGER.info("Saving or updating stocks...");
-        List<Stock> savedStocks = new LinkedList<>();
+    public Stock saveOrUpdateStock(GlobalQuoteItemDto globalQuoteItemDto, StockSymbol symbol) {
+        Optional<Stock> existingStock = repository.findByStockSymbol(symbol.getSymbol());
 
-        Map<String, String> symbolsToCompanyName = symbols
-                .stream()
-                .collect(Collectors.toMap(StockSymbol::getSymbol, StockSymbol::getCompanyName));
-
-        Map<String, Stock> stockMap = repository.findAll()
-                .stream()
-                .collect(Collectors.toMap(Stock::getStockSymbol, stock -> stock));
-
-        for (GlobalQuoteItemDto globalQuoteItemDto : globalQuoteItemDtos) {
-            if (globalQuoteItemDto == null || globalQuoteItemDto.getSymbol() == null) {
-                continue;
-            }
-
-            Stock existingStock = stockMap.get(globalQuoteItemDto.getSymbol());
-
-            if (existingStock != null) {
-                savedStocks.add(updateStock(globalQuoteItemDto, existingStock));
-            } else {
-                savedStocks.add(createNewStock(globalQuoteItemDto, symbolsToCompanyName));
-            }
+        if (existingStock.isPresent()) {
+            LOGGER.info("Updating stock with symbol {}.", globalQuoteItemDto.getSymbol());
+            return updateStock(globalQuoteItemDto, existingStock.get());
         }
 
-        return savedStocks;
+        LOGGER.info("Persist new stock with symbol: {}", symbol.getSymbol());
+        return createNewStock(globalQuoteItemDto, symbol.getCompanyName());
     }
 
     private Stock createNewStock(GlobalQuoteItemDto globalQuoteItemDto,
-                                 Map<String, String> symbolsAndCompany) {
+                                 String companyName) {
 
         Stock newStock = new Stock()
                 .setStockSymbol(globalQuoteItemDto.getSymbol())
-                .setCompanyName(symbolsAndCompany.get(globalQuoteItemDto.getSymbol()))
+                .setCompanyName(companyName)
                 .setPrice(Double.parseDouble(globalQuoteItemDto.getPrice()))
                 .setLastUpdate(Calendar.getInstance().getTime());
 
@@ -79,5 +63,9 @@ public class StockService {
 
     public Optional<Stock> findById(Long id) {
         return repository.findById(id);
+    }
+
+    public Optional<Stock> findBySymbol(String symbol) {
+        return repository.findByStockSymbol(symbol);
     }
 }

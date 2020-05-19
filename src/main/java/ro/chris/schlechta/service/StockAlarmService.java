@@ -63,8 +63,7 @@ public class StockAlarmService {
                 .setNegativeVariance(stockAlarmDto.getNegativeVariance())
                 .setActive(true);
 
-        return repository.save(existingAlarm
-        );
+        return repository.save(existingAlarm);
     }
 
     public List<StockAlarm> getAllAlarmsPerUser() {
@@ -80,7 +79,7 @@ public class StockAlarmService {
         return repository.findById(id);
     }
 
-    public void updateCurrentPrice(List<Stock> stocks) {
+    public void updateAlarmsWithTheCurrentPrices(List<Stock> stocks) {
         LOGGER.info("Update current price for stock alarms");
 
         stocks

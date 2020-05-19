@@ -8,6 +8,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ro.chris.schlechta.dto.StockAlarmDto;
+import ro.chris.schlechta.dto.mapper.StockAlarmMapper;
 import ro.chris.schlechta.model.CustomUserDetails;
 import ro.chris.schlechta.model.StockAlarm;
 import ro.chris.schlechta.response.StandardResponse;
@@ -70,7 +71,12 @@ public class StockAlarmController {
 
         return ResponseEntity
                 .created(URI.create("http://localhost:8081/alarms/" + createdAlarm.getId()))
-                .body(new StandardResponse("The alarm was created successfully", createdAlarm));
+                .body(
+                        new StandardResponse(
+                                "The alarm was created successfully",
+                                StockAlarmMapper.toStockAlarmDto(createdAlarm)
+                        )
+                );
     }
 
     @PutMapping("/alarms")
@@ -86,7 +92,12 @@ public class StockAlarmController {
         }
 
         return ResponseEntity
-                .ok(new StandardResponse("Updated successfully!", updatedAlarm));
+                .ok(
+                        new StandardResponse(
+                                "Updated successfully!",
+                                StockAlarmMapper.toStockAlarmDto(updatedAlarm)
+                        )
+                );
     }
 
     @DeleteMapping("/alarms")

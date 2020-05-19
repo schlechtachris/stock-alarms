@@ -37,7 +37,7 @@ public class EmailService {
             Message message = buildEmailMessage(session, stockAlarm);
             Transport.send(message);
 
-            LOGGER.info("The email was send successfully.");
+            LOGGER.info("The email was sent successfully.");
         } catch (MessagingException e) {
             LOGGER.error("There was a problem send email to user {}!", stockAlarm.getUser().getEmail());
             e.printStackTrace();
@@ -70,11 +70,13 @@ public class EmailService {
 
     private Properties setupMailSessionProperties() {
         Properties prop = new Properties();
+
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "465");
         prop.put("mail.smtp.auth", "true");
         prop.put("mail.smtp.socketFactory.port", "465");
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
         return prop;
     }
 
